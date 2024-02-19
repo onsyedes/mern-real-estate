@@ -2,6 +2,7 @@ const express = require("express");
 const { PORT } = require("./config");
 const expressApp = require("./express-app");
 const { databaseConnection } = require("./database");
+
 const StartServer = async () => {
   process.on("unhandledRejection", (error) => {
     console.log({ errorName: error.name, message: error.message });

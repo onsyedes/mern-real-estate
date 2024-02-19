@@ -1,4 +1,5 @@
 const CostumError = require("./CustomError");
+
 const validationErrorHandler = (error) => {
   const errors = Object.values(error.errors).map((val) => val.message);
   const errorMessages = errors.join(". ");

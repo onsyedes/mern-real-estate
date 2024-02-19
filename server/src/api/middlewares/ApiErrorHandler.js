@@ -1,9 +1,7 @@
-const {
-  validationErrorHandler,
-  castErrorHandler,
-  duplicateKeyErrorHAndler,
-} = require("../../utils/app-errors");
+const { appErrors } = require("../../utils");
 
+const { validationErrorHandler, castErrorHandler, duplicateKeyErrorHAndler } =
+  appErrors;
 const ApiErrorHandler = (error, req, res, next) => {
   error.statusCode = error.statusCode || 500;
   error.status = error.status || "error";

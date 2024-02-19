@@ -1,3 +1,3 @@
 module.exports = {
-  renting: require("./renting"),
+  user: require("./routes/user"),
 };

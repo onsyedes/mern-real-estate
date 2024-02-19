@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const { renting } = require("./api");
-const CostumError = require("./utils/CustomError");
-const ApiErrorHandler = require("./api/middlewares/ApiErrorHandler");
+const { user } = require("./api");
+
+const CostumError = require("./utils");
+const { ApiErrorHandler } = require("./api/middlewares");
 module.exports = async (app) => {
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
@@ -10,8 +11,7 @@ module.exports = async (app) => {
   app.use(express.static(__dirname + "/public"));
 
   //api
-  renting(app);
-
+  app.use("/api/users", user);
   app.all("*", (req, res, next) => {
     const err = new CostumError(
       `can't find ${req.originalUrl} on the server`,
