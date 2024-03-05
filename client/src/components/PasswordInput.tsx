@@ -3,11 +3,12 @@ import { Eye, EyeOff } from "lucide-react";
 import { FieldError, UseFormRegister } from "react-hook-form";
 import { SignupForm } from "../pages/Signup";
 import ErrorMessage from "./ErrorMessage";
+import { SigninForm } from "../pages/Signin";
 type PasswordInputProps = {
   error: FieldError | undefined;
-  register: UseFormRegister<SignupForm>;
+  register: UseFormRegister<SignupForm | SigninForm>;
   placeHolder: string;
-  name: Exclude<keyof SignupForm, "email" | "username">;
+  name: Exclude<keyof SignupForm, "email" | "username"> | keyof SigninForm;
 };
 const PasswordInput = ({
   register,

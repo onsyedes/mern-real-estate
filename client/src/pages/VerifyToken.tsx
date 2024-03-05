@@ -14,9 +14,7 @@ const VerifyToken = () => {
     if (response.status != 200) {
       return navigate("/notfound");
     } else {
-      return navigate("/sign-in", {
-        state: { message: "Account activated succefully, You can login" },
-      });
+      return navigate("/sign-in");
     }
   };
   useEffect(() => {

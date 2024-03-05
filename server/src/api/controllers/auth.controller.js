@@ -16,6 +16,7 @@ const { CLIENT_URL, JWT_SECRET_KEY } = require("../../config");
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
   const { email, password } = { ...req.body };
+  console.log({ email, password });
   const userExists = await userModel.find({
     email,
   });

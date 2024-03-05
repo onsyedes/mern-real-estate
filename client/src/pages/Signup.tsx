@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { PasswordInput, ErrorMessage } from "../components";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 const schema = z
   .object({
     username: z.string().min(1, "Username is required"),
@@ -49,7 +50,11 @@ const Signup = () => {
       });
       const data = await response.json();
 
-      if (response.status != 200) {
+      if (response.status === 200) {
+        toast("A validation link is sent to your Email.  🐱‍🏍", {
+          position: "top-right",
+        });
+      } else {
         throw new Error(data.message);
       }
     } catch (error) {
