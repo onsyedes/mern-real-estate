@@ -3,4 +3,5 @@ module.exports = {
   CustomError: require("./CustomError"),
   asyncErrorHandler: require("./asyncErrorHandler"),
   ApiFeatures: require("./apiFeatures"),
+  EmailSender: require("./nodeMailer"),
 };
