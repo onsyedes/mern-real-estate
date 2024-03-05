@@ -1,6 +1,6 @@
 const {
   asyncErrorHandler,
-  CostumError,
+  CustomError,
   ApiFeatures,
 } = require("./../../utils");
 const { userModel } = require("./../../database");
@@ -25,7 +25,7 @@ const checkId = async (req, res, next, value) => {
   let user = await userModel.findById(value);
   console.log(user);
   if (!user) {
-    const err = new CostumError("invalid id", 400);
+    const err = new CustomError("invalid id", 400);
     return next(err);
   }
   next();

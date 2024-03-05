@@ -1,10 +1,10 @@
-const CostumError = require("./CustomError");
+const CustomError = require("./CustomError");
 
 const validationErrorHandler = (error) => {
   const errors = Object.values(error.errors).map((val) => val.message);
   const errorMessages = errors.join(". ");
   const msg = `Invalid input data : ${errorMessages}`;
-  return new CostumError(msg, 400);
+  return new CustomError(msg, 400);
 };
 
 const castErrorHandler = (error) => {
@@ -12,10 +12,12 @@ const castErrorHandler = (error) => {
   return new CustomError(msg, 400);
 };
 const duplicateKeyErrorHAndler = (error) => {
-  const name = error.keyValue.name;
+  console.log(error);
+  const fields = Object.keys(error.keyValue);
+  const name = fields[0];
 
-  const msg = `" ${name} " is already in use.`;
-  return new CostumError(msg, 400);
+  const msg = ` ${name} is already in use.`;
+  return new CustomError(msg, 400);
 };
 module.exports = {
   validationErrorHandler,

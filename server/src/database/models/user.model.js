@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: [true, "Username is required"],
-      unique: [true, "Username is already in use"],
     },
     email: {
       unique: [true, "Email is already in use"],
@@ -16,8 +15,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
-    age: Number,
-    rating: Number,
+    salt: String,
+    avatar: {
+      type: String,
+      default:
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+    },
   },
   { timestamps: true }
 );
