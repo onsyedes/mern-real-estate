@@ -38,6 +38,12 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         status: "success",
         data: {
           token,
+          user: {
+            id: user._id,
+            email: user.email,
+            avatar: user.avatar,
+            username: user.username,
+          },
         },
       });
     } else {

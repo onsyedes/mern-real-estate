@@ -126,7 +126,7 @@ const Signup = () => {
               </button>
               <span className="mt-1 text-bold">
                 Have an account?{" "}
-                <Link className="underline" to="sign-in">
+                <Link className="underline" to="/sign-in">
                   Sign in
                 </Link>
               </span>

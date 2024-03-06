@@ -4,13 +4,15 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { ErrorMessage, PasswordInput } from "../components";
-
+import { useAppDispatch } from "./../app/hooks";
+import { login } from "../features/userSlice";
 const schema = z.object({
   email: z.string().email().min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
 });
 export type SigninForm = z.infer<typeof schema>;
 const Signin = () => {
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
@@ -31,6 +33,7 @@ const Signin = () => {
     });
     const data = await response.json();
     if (response.status === 200) {
+      dispatch(login(data.data));
       navigate("/home");
     } else {
       setError("root", { message: data.message });
