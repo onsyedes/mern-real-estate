@@ -1,5 +1,5 @@
 import "./App.css";
-import { GuardedRoutes, Header } from "./components";
+import { AuthenticationRoutes, GuardedRoutes, Header } from "./components";
 import {
   Profile,
   Signup,
@@ -20,8 +20,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/sign-up" element={<Signup />} />
-        <Route path="/sign-in" element={<Signin />} />
+        <Route element={<AuthenticationRoutes />}>
+          <Route path="/sign-up" element={<Signup />} />
+          <Route path="/sign-in" element={<Signin />} />
+        </Route>
         <Route path="/verify-account" element={<VerifyToken />} />
         <Route path="/notfound" element={<NotFound />} />
         <Route element={<GuardedRoutes />}>
