@@ -3,12 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
 
 interface UserState {
-  token: string | null;
   currentUser: User | null;
 }
 
 const initialState = {
-  token: null,
   currentUser: null,
 } satisfies UserState as UserState;
 const userSlice = createSlice({
@@ -17,11 +15,9 @@ const userSlice = createSlice({
   reducers: {
     login: (state, action) => {
       state.currentUser = action.payload.user;
-      state.token = action.payload.token;
     },
     logout: (state) => {
       state.currentUser = null;
-      state.token = null;
     },
   },
 });

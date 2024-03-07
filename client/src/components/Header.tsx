@@ -1,8 +1,49 @@
-import React, { useState } from "react";
+import React from "react";
 import { Home, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../app/hooks";
+import { logout, selectUser } from "../features/userSlice";
+
 const Header = () => {
-  const [isAuth, setisAuth] = useState(true);
+  const authUser = useAppSelector(selectUser);
+  const dispatch = useAppDispatch();
+  const onLogout = () => {
+    dispatch(logout());
+  };
+  const profilePicture = (
+    <div className="dropdown dropdown-end">
+      <div
+        tabIndex={0}
+        role="button"
+        className="btn btn-ghost btn-circle avatar"
+      >
+        <div className="w-10 rounded-full">
+          <img alt="Tailwind CSS Navbar component" src={authUser?.avatar} />
+        </div>
+      </div>
+      <ul
+        tabIndex={0}
+        className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+      >
+        <li>
+          <Link to="/profile" className="justify-between">
+            Profile
+          </Link>
+        </li>
+        <li>
+          <a>Settings</a>
+        </li>
+        <li>
+          <a onClick={onLogout}>Logout</a>
+        </li>
+      </ul>
+    </div>
+  );
+  const loginButton = (
+    <Link to="/sign-in" className="btn">
+      Login
+    </Link>
+  );
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">
@@ -46,38 +87,10 @@ const Header = () => {
             className="input input-bordered w-24 md:w-auto"
           />
         </div>
-        {isAuth ? profilePicture : loginButton}
+        {authUser ? profilePicture : loginButton}
       </div>
     </div>
   );
 };
-const profilePicture = (
-  <div className="dropdown dropdown-end">
-    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-      <div className="w-10 rounded-full">
-        <img
-          alt="Tailwind CSS Navbar component"
-          src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-        />
-      </div>
-    </div>
-    <ul
-      tabIndex={0}
-      className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
-    >
-      <li>
-        <Link to="/profile" className="justify-between">
-          Profile
-        </Link>
-      </li>
-      <li>
-        <a>Settings</a>
-      </li>
-      <li>
-        <a>Logout</a>
-      </li>
-    </ul>
-  </div>
-);
-const loginButton = <a className="btn">Button</a>;
+
 export default Header;

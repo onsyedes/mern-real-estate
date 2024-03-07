@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { ErrorMessage, PasswordInput } from "../components";
+import { ErrorMessage, OAuthButton, PasswordInput } from "../components";
 import { useAppDispatch } from "./../app/hooks";
 import { login } from "../features/userSlice";
 const schema = z.object({
@@ -80,6 +80,7 @@ const Signin = () => {
                   "Sign in"
                 )}
               </button>
+              <OAuthButton />
               <span className="mt-1 text-bold">
                 Don't have an account?{" "}
                 <Link className="underline" to="/sign-up">

@@ -34,18 +34,21 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         id: user._id,
         expiresIn: "30d",
       });
-      return res.status(200).json({
-        status: "success",
-        data: {
-          token,
-          user: {
-            id: user._id,
-            email: user.email,
-            avatar: user.avatar,
-            username: user.username,
+
+      return res
+        .cookie("access-token", token, { httpOnly: true })
+        .status(200)
+        .json({
+          status: "success",
+          data: {
+            user: {
+              id: user._id,
+              email: user.email,
+              avatar: user.avatar,
+              username: user.username,
+            },
           },
-        },
-      });
+        });
     } else {
       let error = new CustomError("Wrong password", 400);
       next(error);
@@ -90,6 +93,40 @@ module.exports.activateAccount = asyncErrorHandler(async (req, res, next) => {
   }
 });
 
+module.exports.googleAuthentication = asyncErrorHandler(
+  async (req, res, next) => {
+    const { email, avatar, username } = { ...req.body };
+
+    //check if user exists
+    const user = await userModel.findOne({
+      email: req.body.email,
+    });
+    if (user) {
+      //login
+      await generateTokenForGoogleAuth(user, res);
+    } else {
+      //create new user
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const salt = await GenerateSalt();
+      let cryptedPassword = await GeneratePassword(generatedPassword, salt);
+      let generatedUsername =
+        username.split(" ").join("").toLowerCase() +
+        Math.random().toString(36).slice(-4);
+      let createdUser = await userModel.create({
+        email,
+        username: generatedUsername,
+        password: cryptedPassword,
+        salt,
+        avatar,
+        isEnabled: true,
+      });
+      await generateTokenForGoogleAuth(createdUser, res);
+    }
+  }
+);
+
 async function sendEmailValidationToken(email, id, salt) {
   const token = await GenerateSignature({ salt, id, expiresIn: "1d" });
   const subject = "Hello ✔";
@@ -111,4 +148,23 @@ async function verifyEmailToken(token) {
   } catch (error) {
     throw new CustomError(error.message, 500);
   }
+}
+
+async function generateTokenForGoogleAuth(user, res) {
+  const token = await GenerateSignature({
+    email: user.email,
+    id: user._id,
+    expiresIn: "30d",
+  });
+  const { password: pass, ...rest } = user._doc;
+
+  return res
+    .cookie("access-token", token, { httpOnly: true })
+    .status(200)
+    .json({
+      status: "success",
+      data: {
+        user: rest,
+      },
+    });
 }
