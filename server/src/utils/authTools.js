@@ -3,9 +3,10 @@ var bcrypt = require("bcryptjs");
 const { JWT_SECRET_KEY } = require("./../config");
 module.exports.ValidateSignature = async (req) => {
   try {
-    const signature = req.get("Authorization");
-
-    const payload = await jwt.verify(signature.split(" ")[1], JWT_SECRET_KEY);
+    // const signature = req.get("Authorization");
+    const token = req.cookies.access_token;
+    if (!token) return false;
+    const payload = await jwt.verify(token, JWT_SECRET_KEY);
     req.user = payload;
     return true;
   } catch (error) {

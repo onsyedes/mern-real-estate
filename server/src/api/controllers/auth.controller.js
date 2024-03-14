@@ -34,18 +34,15 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
         id: user._id,
         expiresIn: "30d",
       });
-
+      const { password, salt, isEnabled, ...rest } = user._doc;
       return res
-        .cookie("access-token", token, { httpOnly: true })
+        .cookie("access_token", token, { httpOnly: true })
         .status(200)
         .json({
           status: "success",
           data: {
             user: {
-              id: user._id,
-              email: user.email,
-              avatar: user.avatar,
-              username: user.username,
+              ...rest,
             },
           },
         });
@@ -156,15 +153,16 @@ async function generateTokenForGoogleAuth(user, res) {
     id: user._id,
     expiresIn: "30d",
   });
-  const { password: pass, ...rest } = user._doc;
-
+  const { password, salt, isEnabled, ...rest } = user._doc;
   return res
-    .cookie("access-token", token, { httpOnly: true })
+    .cookie("access_token", token, { httpOnly: true })
     .status(200)
     .json({
       status: "success",
       data: {
-        user: rest,
+        user: {
+          ...rest,
+        },
       },
     });
 }

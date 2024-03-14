@@ -6,6 +6,7 @@ import { logout, selectUser } from "../features/userSlice";
 
 const Header = () => {
   const authUser = useAppSelector(selectUser);
+
   const dispatch = useAppDispatch();
   const onLogout = () => {
     dispatch(logout());
@@ -18,7 +19,11 @@ const Header = () => {
         className="btn btn-ghost btn-circle avatar"
       >
         <div className="w-10 rounded-full">
-          <img alt="Tailwind CSS Navbar component" src={authUser?.avatar} />
+          <img
+            alt="user image"
+            src={`${authUser?.avatar}?v=${authUser?.updatedAt}`}
+            key={authUser?.updatedAt}
+          />
         </div>
       </div>
       <ul
@@ -34,7 +39,9 @@ const Header = () => {
           <a>Settings</a>
         </li>
         <li>
-          <a onClick={onLogout}>Logout</a>
+          <Link to="/sign-in" onClick={onLogout}>
+            Logout
+          </Link>
         </li>
       </ul>
     </div>

@@ -4,3 +4,4 @@ export { default as PasswordInput } from "./PasswordInput";
 export { default as OAuthButton } from "./OAuthButton";
 export { default as GuardedRoutes } from "./Guards/GuardedRoutes";
 export { default as AuthenticationRoutes } from "./Guards/AuthenticationRoutes";
+export { default as RadialProgress } from "./RadialProgress";
