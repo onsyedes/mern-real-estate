@@ -16,39 +16,40 @@ const { CLIENT_URL, JWT_SECRET_KEY } = require("../../config");
 
 module.exports.login = asyncErrorHandler(async (req, res, next) => {
   const { email, password } = { ...req.body };
-  console.log({ email, password });
+
   const userExists = await userModel.find({
     email,
   });
   if (userExists.length > 0) {
     const user = userExists[0];
-
-    var isPasswordValid = await ValidatePassword(
-      password,
-      user.password,
-      user.salt
-    );
-    if (isPasswordValid) {
-      const token = await GenerateSignature({
-        email: user.email,
-        id: user._id,
-        expiresIn: "30d",
-      });
-      const { password, salt, isEnabled, ...rest } = user._doc;
-      return res
-        .cookie("access_token", token, { httpOnly: true })
-        .status(200)
-        .json({
-          status: "success",
-          data: {
+    if (!user.isEnabled) {
+      let error = new CustomError("Please activate your account", 400);
+      next(error);
+    } else {
+      var isPasswordValid = await ValidatePassword(
+        password,
+        user.password,
+        user.salt
+      );
+      if (!isPasswordValid) {
+        let error = new CustomError("Wrong password", 400);
+        next(error);
+      } else {
+        const token = await GenerateSignature({
+          email: user.email,
+          id: user._id,
+          expiresIn: "30d",
+        });
+        const { password, salt, isEnabled, ...rest } = user._doc;
+        return res
+          .cookie("access_token", token, { httpOnly: true })
+          .status(200)
+          .json({
             user: {
               ...rest,
             },
-          },
-        });
-    } else {
-      let error = new CustomError("Wrong password", 400);
-      next(error);
+          });
+      }
     }
   } else {
     let error = new CustomError("Email does not exist", 400);
@@ -58,6 +59,7 @@ module.exports.login = asyncErrorHandler(async (req, res, next) => {
 
 module.exports.signup = asyncErrorHandler(async (req, res, next) => {
   const { username, email, password } = { ...req.body.user };
+
   let salt = await GenerateSalt();
   let cryptedPassword = await GeneratePassword(password, salt);
   let createdUser = await userModel.create({
@@ -73,7 +75,7 @@ module.exports.signup = asyncErrorHandler(async (req, res, next) => {
       createdUser.salt
     );
   }
-  return res.status(200).json({ data: createdUser });
+  return res.status(200).json({ user: { createdUser } });
 });
 
 module.exports.activateAccount = asyncErrorHandler(async (req, res, next) => {
@@ -85,7 +87,7 @@ module.exports.activateAccount = asyncErrorHandler(async (req, res, next) => {
     return res.status(200).json(response);
   } catch (err) {
     let error = new CustomError(err.message, 500);
-    console.log(error);
+
     next(error);
   }
 });
@@ -158,11 +160,8 @@ async function generateTokenForGoogleAuth(user, res) {
     .cookie("access_token", token, { httpOnly: true })
     .status(200)
     .json({
-      status: "success",
-      data: {
-        user: {
-          ...rest,
-        },
+      user: {
+        ...rest,
       },
     });
 }

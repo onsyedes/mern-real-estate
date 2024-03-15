@@ -1,21 +1,26 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { FieldError, UseFormRegister } from "react-hook-form";
-import { SignupForm } from "../pages/Signup";
+import {
+  FieldError,
+  FieldValues,
+  Path,
+  UseFormRegister,
+} from "react-hook-form";
 import ErrorMessage from "./ErrorMessage";
-import { SigninForm } from "../pages/Signin";
-type PasswordInputProps = {
+type PasswordInputProps<T extends FieldValues> = {
   error: FieldError | undefined;
-  register: UseFormRegister<SignupForm | SigninForm>;
+  register: UseFormRegister<T>;
   placeHolder: string;
-  name: Exclude<keyof SignupForm, "email" | "username"> | keyof SigninForm;
+  name: Path<T>;
+  label: string;
 };
-const PasswordInput = ({
+const PasswordInput = <T extends FieldValues>({
   register,
   placeHolder,
   name,
   error,
-}: PasswordInputProps) => {
+  label,
+}: PasswordInputProps<T>) => {
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordDisplay = () => {
     setShowPassword((prev) => !prev);
@@ -24,7 +29,7 @@ const PasswordInput = ({
   return (
     <div className="form-control ">
       <label className="label">
-        <span className="label-text">Password</span>
+        <span className="label-text">{label}</span>
       </label>
       <label
         className={`input input-bordered flex items-center gap-2 ${

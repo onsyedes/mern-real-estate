@@ -3,15 +3,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { ErrorMessage, OAuthButton, PasswordInput } from "../components";
+import {
+  ErrorMessage,
+  Loading,
+  OAuthButton,
+  PasswordInput,
+} from "../components";
 import { useAppDispatch } from "./../app/hooks";
 import { login } from "../features/userSlice";
+import useFetch from "../app/custom-hooks/useFetch";
 const schema = z.object({
   email: z.string().email().min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
 });
-export type SigninForm = z.infer<typeof schema>;
+type SigninForm = z.infer<typeof schema>;
 const Signin = () => {
+  const { fetchData } = useFetch<{ message: string }>();
+
   const dispatch = useAppDispatch();
   const {
     register,
@@ -24,19 +32,24 @@ const Signin = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (formData: SigninForm) => {
-    const response = await fetch("/api/auth/login", {
+    const url = `/api/auth/login`;
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
-    });
-    const data = await response.json();
-    if (response.status === 200) {
-      dispatch(login(data.data));
-      navigate("/home");
+    };
+
+    const { data: responseData, error: fetchError } = await fetchData(
+      url,
+      options
+    );
+    if (fetchError) {
+      setError("root", { message: fetchError.message });
     } else {
-      setError("root", { message: data.message });
+      dispatch(login(responseData));
+      navigate("/home");
     }
   };
   return (
@@ -65,20 +78,17 @@ const Signin = () => {
               />
             </div>
             {errors.email && <ErrorMessage message={errors.email?.message} />}
-            <PasswordInput
+            <PasswordInput<SigninForm>
               error={errors.password}
               register={register}
               name="password"
               placeHolder="Password"
+              label="Password"
             />
 
             <div className="form-control mt-6">
               <button disabled={isSubmitting} className="btn btn-primary">
-                {isSubmitting ? (
-                  <span className="loading loading-bars loading-sm"></span>
-                ) : (
-                  "Sign in"
-                )}
+                {isSubmitting ? <Loading /> : "Sign in"}
               </button>
               <OAuthButton />
               <span className="mt-1 text-bold">

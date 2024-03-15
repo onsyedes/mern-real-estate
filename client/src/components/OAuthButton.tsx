@@ -1,16 +1,20 @@
-import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import React from "react";
+import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../firebase";
 import { useAppDispatch } from "../app/hooks";
 import { login } from "../features/userSlice";
+import useFetch from "../app/custom-hooks/useFetch";
 const OAuthButton = () => {
+  const { fetchData } = useFetch<{ message: string }>();
+
   const dispatch = useAppDispatch();
   const handleGoogleAuthentication = async () => {
     const provider = new GoogleAuthProvider();
     const auth = getAuth(app);
     const result = await signInWithPopup(auth, provider);
-    console.log(result);
-    const response = await fetch("/api/auth/google", {
+
+    const url = `/api/auth/google`;
+    const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,10 +24,11 @@ const OAuthButton = () => {
         email: result.user.email,
         avatar: result.user.photoURL,
       }),
-    });
-    const data = await response.json();
+    };
 
-    dispatch(login(data.data));
+    const { data: responseData } = await fetchData(url, options);
+
+    dispatch(login(responseData));
   };
   return (
     <div className="form-control mt-4">

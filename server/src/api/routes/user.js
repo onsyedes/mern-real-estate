@@ -8,4 +8,7 @@ router.param("id", userController.checkId);
 router
   .route("/update/:id")
   .patch(checkAuthentication, ensureAuthorized, userController.updateUser);
+router
+  .route("/delete/:id")
+  .delete(checkAuthentication, ensureAuthorized, userController.deleteAccount);
 module.exports = router;

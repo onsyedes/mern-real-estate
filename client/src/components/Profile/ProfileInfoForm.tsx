@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { ErrorMessage, RadialProgress } from "../../components";
+import { ErrorMessage, Loading, RadialProgress } from "..";
 import {
   getDownloadURL,
   getStorage,
@@ -7,49 +7,54 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../../firebase";
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
-import { selectUser, userUpdateSuccess } from "../../features/userSlice";
-type ProfileForm = {
-  username: string | undefined;
-  avatar?: string | undefined;
+import { useAppDispatch } from "../../app/hooks";
+import { userUpdateSuccess } from "../../features/userSlice";
+import useFetch from "../../app/custom-hooks/useFetch";
+import { User } from "../../../types";
+type ProfileInfoFormProps = {
+  user: User | null;
 };
 
-const ProfileInfoFormV2 = () => {
-  const user = useAppSelector(selectUser);
+const ProfileInfoForm = ({ user }: ProfileInfoFormProps) => {
+  const { fetchData } = useFetch<{ message: string }>();
+
   const dispatch = useAppDispatch();
   const [file, setfile] = useState<File | undefined>(undefined);
-  const [formData, setFormData] = useState<ProfileForm>({
-    avatar: user?.avatar,
-    username: user?.username,
-  });
+
+  const [username, setusername] = useState(user?.username);
 
   const [error, seterror] = useState({ username: "", avatar: "" });
   const [isBtnDisabled, setisBtnDisabled] = useState(false);
   const displayAvatar = file ? URL.createObjectURL(file) : user?.avatar;
 
-  const handleFileUpload = (file: File) => {
-    const storage = getStorage(app);
-    const fileName = user?._id + ".jfif";
+  const handleFileUpload = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = user?._id + ".jfif";
 
-    const storageRef = ref(storage, fileName);
+      const storageRef = ref(storage, fileName);
 
-    const uploadTask = uploadBytesResumable(storageRef, file);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        if (progress >= 100) setisBtnDisabled(false);
-      },
-      () => {
-        seterror({ ...error, avatar: "File Type or size not supported" });
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
-          return setFormData({ ...formData, avatar: downloadUrl });
-        });
-      }
-    );
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          if (progress >= 100) setisBtnDisabled(false);
+        },
+        () => {
+          reject("File Type or size not supported");
+          // seterror({ ...error, avatar: "File Type or size not supported" });
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadUrl) => {
+              resolve(downloadUrl);
+            })
+            .catch(reject);
+        }
+      );
+    });
   };
 
   const onInputChange = (file: File) => {
@@ -66,7 +71,7 @@ const ProfileInfoFormV2 = () => {
       setisBtnDisabled(true);
     } else {
       seterror({ ...error, username: "" });
-      setFormData({ ...formData, username: e.target.value });
+      setusername(e.target.value);
       setisBtnDisabled(false);
     }
   };
@@ -77,19 +82,32 @@ const ProfileInfoFormV2 = () => {
 
     setisBtnDisabled(true);
 
-    if (file) handleFileUpload(file);
+    let avatarUrl = null;
+    if (file) {
+      avatarUrl = await handleFileUpload(file);
+    }
 
-    const res = await fetch(`/api/users/update/${user?._id}`, {
+    const url = `/api/users/update/${user?._id}`;
+    const options = {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
-    });
-    const data = await res.json();
-    if (res.status === 200) {
-      dispatch(userUpdateSuccess(data));
+      body: JSON.stringify({
+        username: username,
+        avatar: avatarUrl,
+      }),
+    };
+
+    const { data: responseData, error: fetchError } = await fetchData(
+      url,
+      options
+    );
+
+    if (!fetchError) {
+      dispatch(userUpdateSuccess(responseData));
     }
+
     setisBtnDisabled(false);
   };
 
@@ -136,7 +154,7 @@ const ProfileInfoFormV2 = () => {
           <span className="label-text">Email</span>
         </label>
         <input
-          placeholder="ons.yedes@gmail.com"
+          placeholder={user?.email}
           className={`input input-bordered `}
           disabled
         />
@@ -148,7 +166,7 @@ const ProfileInfoFormV2 = () => {
           type="submit"
           disabled={isBtnDisabled}
         >
-          confirm
+          {isBtnDisabled ? <Loading /> : "Confirm"}
         </button>
       </div>
     </form>
@@ -191,4 +209,4 @@ const ProfileImageUploadContent = ({
     </div>
   );
 };
-export default ProfileInfoFormV2;
+export default ProfileInfoForm;

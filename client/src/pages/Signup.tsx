@@ -2,9 +2,10 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
-import { PasswordInput, ErrorMessage } from "../components";
+import { PasswordInput, ErrorMessage, Loading } from "../components";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import useFetch from "../app/custom-hooks/useFetch";
 const schema = z
   .object({
     username: z.string().min(1, "Username is required"),
@@ -19,11 +20,13 @@ const schema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Passwords does not match",
+    message: "Passwords do not match",
   });
-export type SignupForm = z.infer<typeof schema>;
+type SignupForm = z.infer<typeof schema>;
 
 const Signup = () => {
+  const { fetchData } = useFetch<{ message: string }>();
+
   const {
     register,
     handleSubmit,
@@ -35,7 +38,8 @@ const Signup = () => {
 
   const onSubmit: SubmitHandler<SignupForm> = async (formData) => {
     try {
-      const response = await fetch("/api/auth/signup", {
+      const url = `/api/auth/signup`;
+      const options = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,15 +51,16 @@ const Signup = () => {
             username: formData.username,
           },
         }),
-      });
-      const data = await response.json();
+      };
 
-      if (response.status === 200) {
+      const { error: fetchError } = await fetchData(url, options);
+
+      if (fetchError) {
+        throw new Error(fetchError.message);
+      } else {
         toast("A validation link is sent to your Email.  🐱‍🏍", {
           position: "top-right",
         });
-      } else {
-        throw new Error(data.message);
       }
     } catch (error) {
       setError("root", { message: error?.message });
@@ -102,11 +107,12 @@ const Signup = () => {
               />
             </div>
             {errors.email && <ErrorMessage message={errors.email?.message} />}
-            <PasswordInput
+            <PasswordInput<SignupForm>
               error={errors.password}
               register={register}
               name="password"
               placeHolder="Password"
+              label="Password"
             />
 
             <PasswordInput
@@ -114,15 +120,12 @@ const Signup = () => {
               register={register}
               name="confirmPassword"
               placeHolder="Confirm password"
+              label="Confirm password"
             />
 
             <div className="form-control mt-6">
               <button disabled={isSubmitting} className="btn btn-primary">
-                {isSubmitting ? (
-                  <span className="loading loading-bars loading-sm"></span>
-                ) : (
-                  "Sign up"
-                )}
+                {isSubmitting ? <Loading /> : "Sign up"}
               </button>
               <span className="mt-1 text-bold">
                 Have an account?{" "}

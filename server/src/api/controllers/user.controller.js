@@ -5,24 +5,32 @@ const {
 } = require("./../../utils");
 const { userModel } = require("./../../database");
 const { ObjectId } = require("mongodb");
-const { GeneratePassword } = require("../../utils/authTools");
+const { GeneratePassword, ValidatePassword } = require("../../utils/authTools");
 module.exports.updateUser = asyncErrorHandler(async (req, res, next) => {
   const id = req.params.id;
-  const { username, avatar } = { ...req.body };
-  console.log(avatar);
-  console.log(username);
-  const newPassword = req.body.password;
+  const { username, avatar, oldPassword, newPassword } = { ...req.body };
+
+  console.log({ username, avatar, oldPassword, newPassword });
   const findUser = await userModel.findById(id);
   const user = {};
-  if (username !== undefined) {
+  if (username) {
     user.username = username;
   }
 
-  if (newPassword !== undefined) {
-    user.password = await GeneratePassword(newPassword, findUser.salt);
+  if (newPassword && oldPassword) {
+    var isPasswordValid = await ValidatePassword(
+      oldPassword,
+      findUser.password,
+      findUser.salt
+    );
+    if (isPasswordValid) {
+      user.password = await GeneratePassword(newPassword, findUser.salt);
+    } else {
+      return next(new CustomError("Wrong credentials", 400));
+    }
   }
 
-  if (avatar !== undefined) {
+  if (avatar) {
     user.avatar = avatar;
   }
 
@@ -65,7 +73,7 @@ module.exports.checkId = async (req, res, next, value) => {
     }
     let user = await userModel.findById(value);
     if (!user) {
-      const err = new CustomError("User not Found", 404);
+      const err = new CustomError("Account not valid", 403);
       return next(err);
     }
     next();
@@ -73,3 +81,14 @@ module.exports.checkId = async (req, res, next, value) => {
     next(new CustomError(error.message));
   }
 };
+
+module.exports.deleteAccount = asyncErrorHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const findUser = await userModel.findById(id);
+  // if (!findUser) {
+  //   const err = new CustomError("User not Found", 404);
+  //   return next(err);
+  // }
+  const deletedUser = await userModel.findByIdAndDelete(id);
+  return res.status(200).json({ user: deletedUser });
+});

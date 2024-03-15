@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-// import ProfileInfoForm from "./ProfileInfoForm";
-import AccountInfoForm from "./AccountInfoForm";
-import ProfileInfoForm from "././ProfileInForm";
+import { AccountInfoForm, ProfileInfoForm } from "../components";
+import { useAppSelector } from "../app/hooks";
+import { selectUser } from "../features/userSlice";
 
 const Profile = () => {
+  const user = useAppSelector(selectUser);
   const [tab, settab] = useState("profile");
   const onTabChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     settab(e.target.value);
@@ -26,7 +27,7 @@ const Profile = () => {
             />
             <div role="tabpanel" className="tab-content p-10">
               {/* profile content */}
-              <ProfileInfoForm />
+              <ProfileInfoForm user={user} />
               {/* end profile content */}
             </div>
 
@@ -43,7 +44,7 @@ const Profile = () => {
 
             <div role="tabpanel" className="tab-content p-10">
               {/* Account content */}
-              <AccountInfoForm />
+              <AccountInfoForm user={user} />
 
               {/* end Account content */}
             </div>
