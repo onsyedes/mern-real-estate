@@ -10,6 +10,7 @@ import { User } from "../../../types";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../features/userSlice";
 import { useAppDispatch } from "../../app/hooks";
+import { deleteObject, getStorage, ref } from "firebase/storage";
 const schema = z
   .object({
     oldPassword: z.string().min(1, "Required field"),
@@ -65,21 +66,31 @@ const AccountInfoForm = ({ user }: AccountInfoFormProps) => {
   };
 
   const onDeleteAccount = async () => {
-    const url = `/api/users/delete/${user?._id}`;
-    const options = {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
+    try {
+      if (user?.avatar.includes("firebase")) {
+        const storage = getStorage();
+        const profilePictureRef = ref(storage, user?.avatar);
+        await deleteObject(profilePictureRef);
+      }
+      const url = `/api/users/delete/${user?._id}`;
+      const options = {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
 
-    const { error: fetchError } = await fetchData(url, options);
+      const { error: fetchError } = await fetchData(url, options);
 
-    if (fetchError) {
-      setError("root", { message: fetchError.message });
-    } else {
-      dispatch(logout());
-      navigate("/sign-in");
+      if (fetchError) {
+        setError("root", { message: fetchError.message });
+      } else {
+        dispatch(logout());
+        navigate("/sign-in");
+      }
+    } catch (error) {
+      console.log(error);
+      setError("root", { message: "An error occured, try again ..." });
     }
   };
   return (

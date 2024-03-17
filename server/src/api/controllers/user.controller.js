@@ -7,10 +7,9 @@ const { userModel } = require("./../../database");
 const { ObjectId } = require("mongodb");
 const { GeneratePassword, ValidatePassword } = require("../../utils/authTools");
 module.exports.updateUser = asyncErrorHandler(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.params.user_ref;
   const { username, avatar, oldPassword, newPassword } = { ...req.body };
 
-  console.log({ username, avatar, oldPassword, newPassword });
   const findUser = await userModel.findById(id);
   const user = {};
   if (username) {
@@ -83,12 +82,8 @@ module.exports.checkId = async (req, res, next, value) => {
 };
 
 module.exports.deleteAccount = asyncErrorHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const findUser = await userModel.findById(id);
-  // if (!findUser) {
-  //   const err = new CustomError("User not Found", 404);
-  //   return next(err);
-  // }
-  const deletedUser = await userModel.findByIdAndDelete(id);
+  const id = req.params.user_ref;
+  const deletedUser = await userModel.deleteOne({ _id: id });
+  res.clearCookie("access_token");
   return res.status(200).json({ user: deletedUser });
 });

@@ -1,7 +1,7 @@
 import "./App.css";
 import { AuthenticationRoutes, GuardedRoutes, Header } from "./components";
 import {
-  Profile,
+  Settings,
   Signup,
   Signin,
   About,
@@ -27,7 +27,7 @@ function App() {
         <Route path="/verify-account" element={<VerifyToken />} />
         <Route path="/notfound" element={<NotFound />} />
         <Route element={<GuardedRoutes />}>
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

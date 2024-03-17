@@ -3,7 +3,7 @@ import { AccountInfoForm, ProfileInfoForm } from "../components";
 import { useAppSelector } from "../app/hooks";
 import { selectUser } from "../features/userSlice";
 
-const Profile = () => {
+const Settings = () => {
   const user = useAppSelector(selectUser);
   const [tab, settab] = useState("profile");
   const onTabChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,4 +56,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Settings;

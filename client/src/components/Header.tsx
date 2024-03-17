@@ -31,12 +31,12 @@ const Header = () => {
         className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
       >
         <li>
-          <Link to="/profile" className="justify-between">
-            Profile
+          <Link to="/settings" className="justify-between">
+            Settings
           </Link>
         </li>
         <li>
-          <a>Settings</a>
+          <a>Listings</a>
         </li>
         <li>
           <Link to="/sign-in" onClick={onLogout}>

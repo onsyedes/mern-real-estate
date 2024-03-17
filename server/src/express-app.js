@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { user, authentication } = require("./api");
+const { user, authentication, listing } = require("./api");
 
 const CustomError = require("./utils");
 const { ApiErrorHandler } = require("./api/middlewares");
@@ -14,6 +14,7 @@ module.exports = async (app) => {
 
   //api
   app.use("/api/users", user);
+  app.use("/api/listings", listing);
   app.use("/api/auth", authentication);
   app.all("*", (req, res, next) => {
     const err = new CustomError(

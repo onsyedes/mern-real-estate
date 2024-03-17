@@ -29,4 +29,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.post("deleteOne", async function () {
+  let id = this.getQuery()["_id"];
+
+  await mongoose.model("Listing").deleteMany({ userRef: id });
+});
+
 module.exports = mongoose.model("User", userSchema);
