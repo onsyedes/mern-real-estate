@@ -8,6 +8,8 @@ import {
   Home,
   VerifyToken,
   NotFound,
+  Listings,
+  CreateListing,
 } from "./pages";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -28,6 +30,10 @@ function App() {
         <Route path="/notfound" element={<NotFound />} />
         <Route element={<GuardedRoutes />}>
           <Route path="/settings" element={<Settings />} />
+          <Route path="/listings">
+            <Route path="" element={<Listings />} />
+            <Route path="new" element={<CreateListing />} />
+          </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

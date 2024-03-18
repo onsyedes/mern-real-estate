@@ -36,7 +36,7 @@ const Header = () => {
           </Link>
         </li>
         <li>
-          <a>Listings</a>
+          <a>My listings</a>
         </li>
         <li>
           <Link to="/sign-in" onClick={onLogout}>
