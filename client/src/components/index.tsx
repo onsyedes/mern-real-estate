@@ -8,3 +8,4 @@ export { default as RadialProgress } from "./RadialProgress";
 export { default as AccountInfoForm } from "./settings-components/AccountInfoForm";
 export { default as ProfileInfoForm } from "./settings-components/ProfileInfoForm";
 export { default as Loading } from "./Loading";
+export { default as ReorderItem } from "./ReorderItem";

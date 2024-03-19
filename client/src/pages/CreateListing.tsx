@@ -1,11 +1,13 @@
 import React, { useReducer } from "react";
 import { UploadCloud } from "lucide-react";
-import { ErrorMessage } from "../components";
+import { ErrorMessage, ReorderItem } from "../components";
+import { Reorder } from "framer-motion";
 enum FileActionKind {
   REMOVE = "REMOVE_FILES",
   UPLOAD = "UPLOAD_FILES",
+  REORDER = "REORDER_FILES",
 }
-type FilesListType = {
+export type FilesListType = {
   file: File;
   preview: string;
 };
@@ -13,6 +15,7 @@ type FilesState = {
   filesList: FilesListType[];
   error: string;
 };
+
 type FilesAction = {
   type: FileActionKind;
   payload: FilesState | number;
@@ -29,16 +32,15 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
       return { ...state, filesList: updatedFilesList };
     }
     case FileActionKind.UPLOAD: {
-      const files = payload.filesList.map((file) => file.file);
-      console.log(files);
-      console.log(`state.files.length  = ${state.filesList.length}`);
+      const files = payload.filesList.map((file: FilesListType) => file.file);
+
       if (state.filesList.length >= 6) {
         return {
           ...state,
           error: "You can Upload only 6 images",
         };
       } else {
-        const validFiles = files.filter((file) => {
+        const validFiles = files.filter((file: File) => {
           const validExtensions = /\.(jpg|jpeg|png|gif|jfif)$/i;
           return (
             file.type.match(/^image\//) || file.name.match(validExtensions)
@@ -49,8 +51,11 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
           6 - state.filesList.length
         );
 
-        const filesList = selectedFiles.map((file) => {
-          return { file, preview: URL.createObjectURL(file) };
+        const filesList = selectedFiles.map((file: File) => {
+          return {
+            file,
+            preview: URL.createObjectURL(file as Blob | MediaSource),
+          };
         });
         return {
           filesList: state.filesList.concat(filesList),
@@ -58,17 +63,26 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
         };
       }
     }
+
+    case FileActionKind.REORDER: {
+      return { ...state, filesList: payload.filesList };
+    }
     default: {
       throw Error("Action non reconnue: " + action.type);
     }
   }
 }
-
 const CreateListing = () => {
   const [state, dispatchFiles] = useReducer(filesReducer, {
     filesList: [],
     error: "",
   });
+  const onReorder = (newValues: FilesListType[]) => {
+    dispatchFiles({
+      type: FileActionKind.REORDER,
+      payload: { ...state, filesList: newValues as FilesListType[] },
+    });
+  };
   const onFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (e.target.files) {
@@ -83,7 +97,6 @@ const CreateListing = () => {
     }
   };
   const onFileRemove = (index: number) => {
-    console.log(index);
     dispatchFiles({ type: FileActionKind.REMOVE, payload: index });
   };
 
@@ -100,7 +113,6 @@ const CreateListing = () => {
   };
   const handleOnDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    console.log("drag-over");
   };
   return (
     <main className="p-3 max-w-4xl mx-auto">
@@ -128,16 +140,27 @@ const CreateListing = () => {
           <div className="flex gap-4 flex-wrap">
             <div className="form-control">
               <label className="label cursor-pointer">
-                <input type="checkbox" defaultChecked className="checkbox" />
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  className="checkbox checkbox-success"
+                />
                 <span className=" pl-2">Sell</span>
               </label>
             </div>
             <div className="form-control">
               <label className="label cursor-pointer">
-                <input type="checkbox" defaultChecked className="checkbox" />
+                <input
+                  type="checkbox"
+                  defaultChecked
+                  className="checkbox checkbox-success"
+                />
                 <span className=" pl-2">Rent</span>
               </label>
             </div>
+          </div>
+
+          <div className="flex gap-4 flex-wrap">
             <div className="form-control">
               <label className="label cursor-pointer">
                 <input type="checkbox" defaultChecked className="checkbox" />
@@ -161,7 +184,6 @@ const CreateListing = () => {
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                id="bedrooms"
                 min="1"
                 max="10"
                 required
@@ -253,25 +275,16 @@ const CreateListing = () => {
           <p className="text-red-700 text-sm">
             {state.error && <ErrorMessage message={state.error} />}
           </p>
-          {state.filesList.map((item, index) => (
-            <div
-              key={item.preview}
-              className="flex justify-between p-3 border items-center"
-            >
-              <img
-                src={item.preview}
-                alt="listing image"
-                className="w-20 h-20 object-contain rounded-lg"
+          <Reorder.Group values={state.filesList} onReorder={onReorder}>
+            {state.filesList.map((item, index) => (
+              <ReorderItem
+                key={item.preview}
+                item={item}
+                onFileRemove={onFileRemove}
+                index={index}
               />
-              <button
-                onClick={() => onFileRemove(index)}
-                type="button"
-                className="p-3 text-red-700 rounded-lg uppercase hover:opacity-75"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
+            ))}
+          </Reorder.Group>
 
           <button className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80">
             Create listing
